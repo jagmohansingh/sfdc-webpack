@@ -1,0 +1,25 @@
+{
+  "name": "webpack-sfdc-lifecycle",
+  "version": "1.0.0",
+  "description": "learning webpack + angular + sfdc",
+  "main": "webpack.config.js",
+  "scripts": {
+    "start": "node node_modules/webpack-dev-server/bin/webpack-dev-server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node node_modules/webpack/bin/webpack.js -p"
+  },
+  "author": "jagmohan singh",
+  "license": "ISC",
+  "dependencies": {
+    "angular": "^1.5.8"
+  },
+  "devDependencies": {
+    "babel-core": "^6.18.0",
+    "babel-loader": "^6.2.7",
+    "babel-preset-es2015": "^6.18.0",
+    "file-loader": "^0.9.0",
+    "raw-loader": "^0.5.1",
+    "webpack": "^1.13.3",
+    "webpack-dev-server": "^1.16.2"
+  }
+}

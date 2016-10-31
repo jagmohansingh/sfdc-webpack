@@ -1,0 +1,114 @@
+<project basedir="." xmlns:sf="antlib:com.salesforce">
+
+    <taskdef resource="com/salesforce/antlib.xml"
+             classPath="lib/ant-salesforce.jar"
+             uri="antlib:com.salesforce"/>
+
+    <property environment="env"/>
+    <property file=".env" prefix="env" relative="true" basedir="."/>
+
+    <target name="buildWebapp">
+        <exec executable="npm" failonerror="true" dir="${basedir}/webapp">
+            <arg value="install"/>
+        </exec>
+        <exec executable="npm" failonerror="true" dir="${basedir}/webapp">
+            <arg value="run"/>
+            <arg value="build"/>
+        </exec>
+        <delete dir="resource-bundles/webapp.resource" />
+        <move file="webapp/dist" tofile="resource-bundles/webapp.resource"/>
+    </target>
+
+    <target name="bundleStaticResources">
+        <zip destfile="src/staticresources/webapp.resource"
+             basedir="resource-bundles/webapp.resource" />
+    </target>
+
+    <target name="unbundleStaticResources">
+        <unzip
+            src="src/staticresources/webapp.resource"
+            dest="resource-bundles/webapp.resource"
+        />
+    </target>
+
+    <target name="setNames">
+        <echo message="Setting Names..."/>
+        <replace file="src/package.xml" token="@@@SALESFORCE_PACKAGE_NAME@@@"
+            value="${env.SALESFORCE_PACKAGE_NAME}"/>
+        <replace file="src/package.xml" token="@@@SALESFORCE_PACKAGE_NAMESPACE@@@"
+            value="${env.SALESFORCE_PACKAGE_NAMESPACE}"/>
+    </target>
+
+    <target name="deploy" description="Deploys the code to salesforce.com">
+        <echo message="Deploying to Salesforce..."/>
+        <!-- <antcall target="setNames" /> -->
+        <antcall target="buildWebapp" />
+        <antcall target="bundleStaticResources" />
+        <sf:deploy username="${env.SALESFORCE_USERNAME}"
+                   password="${env.SALESFORCE_PASSWORD}"
+                   serverurl="${env.SALESFORCE_URL}"
+                   deployRoot="src"/>
+    </target>
+
+    <target name="deployOnly" description="Deploys the code to salesforce.com">
+        <sf:deploy username="${env.SALESFORCE_USERNAME}"
+                   password="${env.SALESFORCE_PASSWORD}"
+                   serverurl="${env.SALESFORCE_URL}"
+                   deployRoot="src"/>
+    </target>
+
+    <target name="test" description="Test without saving to salesforce">
+        <echo message="Testing deployment..."/>
+        <!-- <antcall target="setNames" /> -->
+        <antcall target="buildWebapp" />
+        <antcall target="bundleStaticResources" />
+        <sf:deploy username="${env.SALESFORCE_USERNAME}"
+                   password="${env.SALESFORCE_PASSWORD}"
+                   serverurl="${env.SALESFORCE_URL}"
+                   deployRoot="src"
+                   checkOnly="true"/>
+    </target>
+
+    <target name="refresh" description="Refresh from org">
+        <sf:retrieve username="${env.SALESFORCE_USERNAME}"
+                     password="${env.SALESFORCE_PASSWORD}"
+                     serverurl="${env.SALESFORCE_URL}"
+                     retrieveTarget="src"
+                     unpackaged="src/package.xml"/>
+                     <!-- doing unpackaged until we determine package structure -->
+        <antcall target="unbundleStaticResources" />
+    </target>
+
+    <target name="refreshFromPackage" description="Refresh from org">
+        <sf:retrieve username="${env.SALESFORCE_USERNAME}"
+                     password="${env.SALESFORCE_PASSWORD}"
+                     serverurl="${env.SALESFORCE_URL}"
+                     retrieveTarget="src"
+                     packageNames="${env.SALESFORCE_PACKAGE}"/>
+                     <!-- doing unpackaged until we determine package structure -->
+        <antcall target="unbundleStaticResources" />
+    </target>
+
+    <target name="refreshInstalledPackages" description="Refresh managed packages from org">
+        <sequential>
+            <sf:retrieve 
+                username="${env.SALESFORCE_USERNAME}"
+                password="${env.SALESFORCE_PASSWORD}"
+                serverurl="${env.SALESFORCE_URL}"
+                retrieveTarget="installedPackages"
+                unpackaged="installedPackages/package.xml"/>
+            <!-- remove packages we can't control -->
+            <delete file="installedPackages/installedPackages/sf_com_apps.installedPackage"/>
+            <delete file="installedPackages/installedPackages/sf_chttr_apps.installedPackage"/>
+        </sequential>
+    </target>
+
+    <target name="installPackages" description="Install ">
+        <sf:deploy 
+            username="${env.SALESFORCE_USERNAME}"
+            password="${env.SALESFORCE_PASSWORD}"
+            serverurl="${env.SALESFORCE_URL}"
+            deployRoot="installedPackages"/>
+    </target>
+
+</project>

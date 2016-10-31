@@ -1,0 +1,7 @@
+<apex:component controller="Test">
+	<apex:variable var="webapp_path" value="{!IF($CurrentPage.parameters.webapp_path != null, $CurrentPage.parameters.webapp_path, $Resource.webapp)}" />
+	<script src="{!webapp_path}/test.js"></script>
+	<div ng-app="TestApp">
+		<hello-world></hello-world>
+	</div>
+</apex:component>

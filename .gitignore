@@ -1,0 +1,27 @@
+# eclipse
+.project
+.settings
+salesforce.schema
+Referenced Packages
+
+# mavensmate
+config
+mm*.log
+*.sublime-project
+*.sublime-settings
+*.sublime-workspace
+debug/
+
+# foreman
+.env
+
+# node
+node_modules
+
+# Mac OS X
+.DS_Store
+
+# webapp resource bundle built by gulp
+resource-bundles/webapp.resource/*
+!resource-bundles/webapp.resource/.gitkeep
+npm-debug.log
